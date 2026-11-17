@@ -410,6 +410,7 @@ textarea{min-height:96px;resize:vertical}
           <div class="copyline"><span id="addr">9227 2nd Avenue, Orlando, FL 32824</span><button type="button" data-copy="addr">Copiar</button></div>
           <a class="btn" href="https://www.google.com/maps/search/?api=1&query=9227+2nd+Avenue+Orlando+FL+32824" target="_blank" rel="noopener">Cómo llegar</a>
           <div class="copyline"><span id="tel">(321) 315-1506</span><button type="button" data-copy="tel">Copiar</button></div>
+          <div class="copyline"><span id="mail">cdaorlandoministry@gmail.com</span><button type="button" data-copy="mail">Copiar</button></div>
         </div>
       </div>
       <div class="wrap stack">
@@ -457,6 +458,7 @@ textarea{min-height:96px;resize:vertical}
     <p>Escríbenos o llámanos. Con gusto te respondemos.</p>
     <a class="opt" href="sms:+13213151506"><span class="oi">✉️</span><span>Enviar un mensaje de texto<small>(321) 315-1506</small></span></a>
     <a class="opt" href="tel:+13213151506"><span class="oi">📞</span><span>Llamar a la iglesia<small>(321) 315-1506</small></span></a>
+    <a class="opt" href="mailto:cdaorlandoministry@gmail.com"><span class="oi">📧</span><span>Enviar un correo<small>cdaorlandoministry@gmail.com</small></span></a>
     <a class="opt" href="https://ig.me/m/cdaministry" target="_blank" rel="noopener"><span class="oi">💬</span><span>Escribir por Instagram<small>@cdaministry</small></span></a>
     <button class="opt" type="button" id="optPray"><span class="oi">🙏</span><span>Pedir oración<small>Te acompañamos en oración</small></span></button>
     <button class="close" type="button" id="sheetClose">Cerrar</button>
@@ -613,13 +615,18 @@ $("photo").addEventListener("change",e=>{
   r.onload=()=>{img.onload=()=>{const c=document.createElement("canvas"),s=240,k=Math.max(s/img.width,s/img.height);c.width=c.height=s;const x=c.getContext("2d");x.drawImage(img,(s-img.width*k)/2,(s-img.height*k)/2,img.width*k,img.height*k);pendingPhoto=c.toDataURL("image/jpeg",.82);$("pPic").style.backgroundImage=`url(${pendingPhoto})`;$("pPic").textContent=""};img.src=r.result};
   r.readAsDataURL(f);
 });
+// Envío a la hoja de Google de CDA (correo cdaorlandoministry@gmail.com). Pegar aquí la URL /exec del Apps Script.
+const HOJA_URL="";
+function enviarHoja(datos){if(!HOJA_URL)return Promise.resolve(false);return fetch(HOJA_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(datos)}).then(()=>true,()=>false)}
+if(HOJA_URL){const n=document.querySelector("#profileForm .note");if(n)n.textContent="Al guardar, tu perfil se guarda en este teléfono y se envía a la oficina de CDA."}
 $("profileForm").addEventListener("submit",e=>{
   e.preventDefault();
   profile={...Object.fromEntries(["fullName","phone","email","birthday","address","job","since","conversion","baptized","baptismDate","spirit","civil","spouse","wedding","children","gifts","group"].map(k=>[k,$(k).value.trim()])),
     ministries:[...document.querySelectorAll("#ministries input:checked")].map(c=>c.value),institute:$("institute").checked,photo:pendingPhoto||(profile.example?"":profile.photo)};
   const ok=store.set("cda-perfil",profile);
   $("saved").textContent= ok?"Perfil guardado en este teléfono.":"Perfil actualizado. Este navegador no permite guardarlo, se perderá al cerrar.";
-  $("saved").hidden=false; paintProfile(); window.scrollTo({top:0,behavior:"smooth"});
+  $("saved").hidden=false; paintProfile();
+  const {photo,...sinFoto}=profile; enviarHoja({tipo:"perfil",...sinFoto}).then(ok=>{if(ok)$("saved").textContent="Perfil guardado y enviado a la oficina de CDA."}); window.scrollTo({top:0,behavior:"smooth"});
 });
 
 // Navegación
@@ -644,7 +651,7 @@ document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",(
 }));
 
 // Pedido de oración (vista previa)
-$("prayer").addEventListener("submit",e=>{e.preventDefault();const n=$("prName").value.trim(),t=$("prText").value.trim();if(!t){$("prText").focus();return}const body="Pedido de oración"+(n?" de "+n:"")+": "+t;location.href="sms:+13213151506?&body="+encodeURIComponent(body);$("prOk").hidden=false;e.target.reset();});
+$("prayer").addEventListener("submit",e=>{e.preventDefault();const n=$("prName").value.trim(),t=$("prText").value.trim();if(!t){$("prText").focus();return}const body="Pedido de oración"+(n?" de "+n:"")+": "+t;if(HOJA_URL){enviarHoja({tipo:"oracion",name:n,text:t});$("prOk").textContent="Recibimos tu pedido. ¡Estamos orando contigo!"}else{location.href="sms:+13213151506?&body="+encodeURIComponent(body)}$("prOk").hidden=false;e.target.reset();});
 
 // Fotos: poner el archivo en fotos/ y escribir su nombre en "foto". Sin foto se muestran las iniciales.
 const PASTORES=[{nombre:"Obispo Octavio Guillén",cargo:"Pastor",foto:""},{nombre:"Andrea Orellana",cargo:"Pastora Ejecutiva y directora del Instituto Bíblico",foto:""}];

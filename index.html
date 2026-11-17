@@ -170,7 +170,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--clay);outline-offse
 .chips label{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;font-weight:500;font-size:.85rem;cursor:pointer}
 .chips input{width:auto;accent-color:var(--clay)}
 .chips label:has(input:checked){border-color:var(--clay);background:var(--clay-soft)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
 @media (max-width:380px){.two{grid-template-columns:1fr}}
 
 label{font-size:.85rem;font-weight:600}
@@ -346,13 +346,39 @@ textarea{min-height:96px;resize:vertical}
             <div class="field"><label for="birthday">Cumpleaños</label><input id="birthday" type="date"></div>
           </div>
           <div class="field"><label for="email">Correo</label><input id="email" type="email" autocomplete="email"></div>
+          <div class="field"><label for="address">Dirección (opcional)</label><input id="address" autocomplete="street-address" placeholder="Para visitas pastorales"></div>
+          <div class="field"><label for="job">Profesión u oficio</label><input id="job" placeholder="Ej.: enfermera, maestro, construcción"></div>
+        </div>
+
+        <h2>Mi vida espiritual</h2>
+        <div class="card">
           <div class="two">
-            <div class="field"><label for="since">Miembro desde</label><input id="since" type="number" min="1950" max="2030" placeholder="2020"></div>
-            <div class="field"><label for="baptized">Bautizado en agua</label><select id="baptized"><option value="">—</option><option>Sí</option><option>No</option><option>Quiero bautizarme</option></select></div>
+            <div class="field"><label for="since">Año en que empecé a congregarme en CDA</label><input id="since" type="number" inputmode="numeric" min="1950" max="2030" placeholder="2020"></div>
+            <div class="field"><label for="conversion">Fecha de conversión (cuando acepté a Cristo)</label><input id="conversion" type="date"></div>
           </div>
+          <div class="two">
+            <div class="field"><label for="baptized">Bautizado en agua</label><select id="baptized"><option value="">—</option><option>Sí</option><option>No</option><option>Quiero bautizarme</option></select></div>
+            <div class="field" id="baptDateF"><label for="baptismDate">Fecha de bautismo</label><input id="baptismDate" type="date"></div>
+          </div>
+          <div class="field"><label for="spirit">Bautizado en el Espíritu Santo</label><select id="spirit"><option value="">—</option><option>Sí</option><option>No</option><option>Lo estoy buscando</option></select></div>
+        </div>
+
+        <h2>Mi familia</h2>
+        <div class="card">
+          <div class="field"><label for="civil">Estado civil</label><select id="civil"><option value="">—</option><option>Soltero(a)</option><option>Casado(a)</option><option>Viudo(a)</option><option>Divorciado(a)</option></select></div>
+          <div class="two" id="spouseF">
+            <div class="field"><label for="spouse">Nombre del cónyuge</label><input id="spouse"></div>
+            <div class="field"><label for="wedding">Aniversario de bodas</label><input id="wedding" type="date"></div>
+          </div>
+          <div class="field"><label for="children">Hijos (nombre y edad de cada uno)</label><textarea id="children" rows="3" placeholder="Ej.: Daniel, 12 años&#10;Sofía, 8 años"></textarea></div>
+        </div>
+
+        <h2>Cómo sirvo</h2>
+        <div class="card">
           <div class="field"><label for="group">Grupo CDA en los Hogares</label><input id="group" placeholder="Nombre del grupo, si estás en uno"></div>
           <div class="field"><span style="font-size:.85rem;font-weight:600">Ministerios donde sirvo</span>
             <div class="chips" id="ministries">
+              <label><input type="checkbox" value="Pastor / Pastora">Pastor / Pastora</label>
               <label><input type="checkbox" value="Adoración (New Season Worship)">Adoración (New Season Worship)</label>
               <label><input type="checkbox" value="Jóvenes">Jóvenes</label>
               <label><input type="checkbox" value="Mujeres">Mujeres</label>
@@ -364,12 +390,13 @@ textarea{min-height:96px;resize:vertical}
               <label><input type="checkbox" value="Evangelismo / CDA Groups">Evangelismo / CDA Groups</label>
             </div>
           </div>
+          <div class="field"><label for="gifts">Dones y talentos</label><input id="gifts" placeholder="Ej.: música, cocina, tecnología, enseñanza"></div>
           <div class="field"><span style="font-size:.85rem;font-weight:600">Instituto Bíblico</span>
             <div class="chips"><label><input type="checkbox" id="institute">Estoy inscrito</label></div>
           </div>
           <button class="btn" type="submit">Guardar perfil</button>
           <p class="ok" id="saved" hidden>Perfil guardado en este teléfono.</p>
-          <p class="note">En este prototipo el perfil se guarda solo en tu teléfono. En la app final cada miembro tendrá su cuenta y el equipo pastoral verá el directorio.</p>
+          <p class="note">Por ahora tu perfil se guarda solo en este teléfono.</p>
         </div>
       </form>
     </section>
@@ -560,20 +587,24 @@ const initials = n => (n||"?").replace(/^(Hno\.|Hna\.)\s*/,"").split(/\s+/).slic
 function paintProfile(){
   const p=profile;
   $("pNameShow").textContent=p.fullName||"Tu perfil";
-  $("pSince").textContent=(p.since?`Miembro desde ${p.since}`:"")+(p.example?" · Perfil de ejemplo":"");
+  $("pSince").textContent=(p.since?`En CDA desde ${p.since}`:"")+(p.example?" · Perfil de ejemplo":"");
   $("fMin").textContent=(p.ministries&&p.ministries.length)?p.ministries.join(", "):"—";
   $("fGroup").textContent=p.group||"—";
   $("fBday").textContent=p.birthday?(()=>{const [,m,d]=p.birthday.split("-").map(Number);return `${d} de ${MESL[m-1]}`})():"—";
-  $("fBapt").textContent=p.baptized||"—";
+  $("fBapt").textContent=p.baptismDate?fmtD(p.baptismDate):(p.baptized||"—");
   for(const el of [$("pPic"),$("topAvatar")]){
     if(p.photo){el.style.backgroundImage=`url(${p.photo})`;el.textContent=""}else{el.style.backgroundImage="";el.textContent=initials(p.fullName)}
   }
   $("hello").textContent = p.fullName && !p.example ? `Bienvenido, ${p.fullName.split(" ")[0]}` : "Bienvenido a casa";
   // llenar formulario
-  ["fullName","phone","email","birthday","since","baptized","group"].forEach(k=>$(k).value=p[k]||"");
+  ["fullName","phone","email","birthday","address","job","since","conversion","baptized","baptismDate","spirit","civil","spouse","wedding","children","gifts","group"].forEach(k=>$(k).value=p[k]||"");
+  famVis();
   document.querySelectorAll("#ministries input").forEach(c=>c.checked=(p.ministries||[]).includes(c.value));
   $("institute").checked=!!p.institute;
 }
+function fmtD(v){const [y,m,d]=v.split("-").map(Number);return `${d} ${MESL[m-1].slice(0,3)} ${y}`}
+function famVis(){$("spouseF").hidden=$("civil").value!=="Casado(a)";$("baptDateF").hidden=$("baptized").value!=="Sí"}
+$("civil").addEventListener("change",famVis);$("baptized").addEventListener("change",famVis);
 paintProfile();
 let pendingPhoto=null;
 $("photo").addEventListener("change",e=>{
@@ -584,7 +615,7 @@ $("photo").addEventListener("change",e=>{
 });
 $("profileForm").addEventListener("submit",e=>{
   e.preventDefault();
-  profile={fullName:$("fullName").value.trim(),phone:$("phone").value,email:$("email").value,birthday:$("birthday").value,since:$("since").value,baptized:$("baptized").value,group:$("group").value,
+  profile={...Object.fromEntries(["fullName","phone","email","birthday","address","job","since","conversion","baptized","baptismDate","spirit","civil","spouse","wedding","children","gifts","group"].map(k=>[k,$(k).value.trim()])),
     ministries:[...document.querySelectorAll("#ministries input:checked")].map(c=>c.value),institute:$("institute").checked,photo:pendingPhoto||(profile.example?"":profile.photo)};
   const ok=store.set("cda-perfil",profile);
   $("saved").textContent= ok?"Perfil guardado en este teléfono.":"Perfil actualizado. Este navegador no permite guardarlo, se perderá al cerrar.";

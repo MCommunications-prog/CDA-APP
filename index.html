@@ -35,6 +35,18 @@
 .person{display:flex;align-items:center;gap:14px}
 .person .ph{width:64px;height:64px;border-radius:50%;flex:none;background:var(--brand) center/cover no-repeat;color:var(--accent);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.3rem}
 .person b{display:block}.person small{color:var(--muted)}
+.video{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#000}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vidhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fab{all:unset;cursor:pointer;position:fixed;z-index:7;right:max(16px,calc(50% - 224px));bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1rem;padding:14px 20px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.28);display:flex;align-items:center;gap:8px}
+.fab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet .panel{background:var(--surface);color:var(--ink);width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+.sheet h2{margin:0}.sheet p{margin:0 0 4px;color:var(--muted)}
+.opt{all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:16px;font-size:1.05rem;font-weight:600;color:var(--ink);text-decoration:none}
+.opt small{display:block;font-weight:400;font-size:.85rem;color:var(--muted)}
+.opt .oi{width:44px;height:44px;border-radius:50%;background:var(--brand);color:var(--accent);display:grid;place-items:center;flex:none;font-size:1.3rem}
+.sheet .close{all:unset;cursor:pointer;text-align:center;padding:14px;font-weight:600;color:var(--muted)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{min-height:100%}
@@ -205,6 +217,11 @@ textarea{min-height:96px;resize:vertical}
         </div>
       </div>
 
+      <div class="wrap stack">
+        <div class="head"><h2 id="homeVidTitle">Último culto</h2><button class="link" type="button" data-go="vivo">Más videos</button></div>
+        <div class="video"><iframe id="ytHome" title="Video de CDA en YouTube" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      </div>
+
       <div class="wrap quick">
         <button data-go="vivo"><span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg></span>En vivo</button>
         <button data-go="calendario"><span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>Calendario</button>
@@ -230,12 +247,10 @@ textarea{min-height:96px;resize:vertical}
     <section data-view="vivo" hidden>
       <div class="wrap stack">
         <div class="head"><h2>Cultos en vivo</h2><span id="liveState"></span></div>
-        <a class="player" id="player" href="https://www.youtube.com/@cdaministry4488/live" target="_blank" rel="noopener">
-          <span class="eyebrow on-brand" id="playerTop">YouTube · CDA Ministry</span>
-          <span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
-          <b id="playerTitle">Ver la transmisión</b>
-        </a>
+        <div class="vidhead"><span class="eyebrow" id="vidLabel">Último culto</span></div>
+        <div class="video"><iframe id="ytVivo" title="Video de CDA en YouTube" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
         <p class="note" id="liveNote"></p>
+        <button class="btn ghost" type="button" id="vidSwap" hidden>Ver el último culto</button>
         <a class="btn ghost" href="https://www.youtube.com/@cdaministry4488" target="_blank" rel="noopener">Abrir el canal de CDA en YouTube</a>
       </div>
       <div class="wrap stack">
@@ -383,7 +398,7 @@ textarea{min-height:96px;resize:vertical}
           <div class="field"><label for="prName">Tu nombre (opcional)</label><input id="prName" autocomplete="name"></div>
           <div class="field"><label for="prText">¿Por qué podemos orar?</label><textarea id="prText" required></textarea></div>
           <button class="btn" type="submit">Enviar pedido</button>
-          <p class="ok" id="prOk" hidden>Recibido (vista previa). En la app final este pedido llegará al equipo pastoral.</p>
+          <p class="ok" id="prOk" hidden>Se abrió tu app de mensajes con el pedido listo. Solo toca Enviar. ¡Estamos orando contigo!</p>
         </form>
       </div>
       <div class="wrap stack">
@@ -408,6 +423,19 @@ textarea{min-height:96px;resize:vertical}
       <button data-go="perfil"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Perfil</button>
     </div>
   </nav>
+<button class="fab" type="button" id="fab" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>¿Preguntas?</button>
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetT">
+  <div class="panel">
+    <h2 id="sheetT">¿Cómo te ayudamos?</h2>
+    <p>Escríbenos o llámanos. Con gusto te respondemos.</p>
+    <a class="opt" href="sms:+13213151506"><span class="oi">✉️</span><span>Enviar un mensaje de texto<small>(321) 315-1506</small></span></a>
+    <a class="opt" href="tel:+13213151506"><span class="oi">📞</span><span>Llamar a la iglesia<small>(321) 315-1506</small></span></a>
+    <a class="opt" href="https://ig.me/m/cdaministry" target="_blank" rel="noopener"><span class="oi">💬</span><span>Escribir por Instagram<small>@cdaministry</small></span></a>
+    <button class="opt" type="button" id="optPray"><span class="oi">🙏</span><span>Pedir oración<small>Te acompañamos en oración</small></span></button>
+    <button class="close" type="button" id="sheetClose">Cerrar</button>
+  </div>
+</div>
+
 </div>
 
 <script>
@@ -474,10 +502,31 @@ function tick(){
   if(live){ $("nextLabel").textContent="Ahora mismo"; $("nextName").textContent=live.n; $("nextWhen").textContent=isLive?"Toca En vivo para verlo":"En el templo"; }
   else { $("nextLabel").textContent="Próxima reunión"; $("nextName").textContent=best.r.n; $("nextWhen").textContent=`${DIA[best.t.getDay()]} ${fmtHour(best.t.getHours(),best.t.getMinutes())} · ${until(best.t-now)}`; }
   $("liveState").innerHTML = isLive?'<span class="livepill">En vivo</span>':'<span class="offpill">Fuera del aire</span>';
-  $("playerTop").textContent = isLive? live.n : "Próxima transmisión";
-  $("playerTitle").textContent = isLive? "Ver ahora en YouTube" : `${nextLive.r.n} · ${DIA[nextLive.t.getDay()]} ${fmtHour(nextLive.t.getHours(),nextLive.t.getMinutes())}`;
-  $("liveNote").textContent = isLive? "La transmisión abre en el canal de CDA en YouTube." : `Próximo culto dominical en ${until(nextLive.t-now).replace("faltan ","")}. Toca el recuadro para abrir la transmisión en YouTube.`;
+    $("liveNote").textContent = isLive? `${live.n} en vivo. Toca el video para verlo.` : `Próxima transmisión: ${nextLive.r.n}, ${DIA[nextLive.t.getDay()]} ${fmtHour(nextLive.t.getHours(),nextLive.t.getMinutes())}. Mientras tanto, mira el último culto.`;
+  updVideo(!!isLive);
 }
+
+// Video: en horario de transmisión muestra el en vivo; si no, el último culto subido al canal.
+const YT_LIVE="https://www.youtube.com/embed/live_stream?channel=UCF9J9rsD1Bl1QD3lcDgU7tw";
+const YT_ULTIMO="https://www.youtube.com/embed/videoseries?list=UUF9J9rsD1Bl1QD3lcDgU7tw";
+let vidMode=null, forceLast=false;
+function setVid(id,url){const f=$(id);if(f&&f.getAttribute("src")!==url)f.setAttribute("src",url)}
+function updVideo(isLive){
+  const mode=(isLive&&!forceLast)?"live":"last"; if(mode===vidMode)return; vidMode=mode;
+  const url=mode==="live"?YT_LIVE:YT_ULTIMO;
+  setVid("ytVivo",url); setVid("ytHome",url);
+  $("vidLabel").textContent=mode==="live"?"En vivo ahora":"Último culto";
+  $("homeVidTitle").textContent=mode==="live"?"En vivo ahora":"Último culto";
+  $("vidSwap").hidden=!isLive; $("vidSwap").textContent=forceLast?"Volver a la transmisión en vivo":"¿Aún no empieza? Ver el último culto";
+}
+$("vidSwap").addEventListener("click",()=>{forceLast=!forceLast;vidMode=null;tick()});
+// Botón de preguntas
+const sheet=$("sheet");
+$("fab").addEventListener("click",()=>{sheet.hidden=false;$("sheetClose").focus()});
+$("sheetClose").addEventListener("click",()=>{sheet.hidden=true;$("fab").focus()});
+sheet.addEventListener("click",e=>{if(e.target===sheet)sheet.hidden=true});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")sheet.hidden=true});
+$("optPray").addEventListener("click",()=>{sheet.hidden=true;location.hash="visitanos";setTimeout(()=>$("prayer").scrollIntoView({behavior:"smooth",block:"start"}),150)});
 tick(); setInterval(tick,30000);
 
 // Calendario
@@ -564,7 +613,7 @@ document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",(
 }));
 
 // Pedido de oración (vista previa)
-$("prayer").addEventListener("submit",e=>{e.preventDefault();$("prOk").hidden=false;e.target.reset();});
+$("prayer").addEventListener("submit",e=>{e.preventDefault();const n=$("prName").value.trim(),t=$("prText").value.trim();if(!t){$("prText").focus();return}const body="Pedido de oración"+(n?" de "+n:"")+": "+t;location.href="sms:+13213151506?&body="+encodeURIComponent(body);$("prOk").hidden=false;e.target.reset();});
 
 // Fotos: poner el archivo en fotos/ y escribir su nombre en "foto". Sin foto se muestran las iniciales.
 const PASTORES=[{nombre:"Obispo Octavio Guillén",cargo:"Pastor",foto:""},{nombre:"Andrea Orellana",cargo:"Pastora Ejecutiva y directora del Instituto Bíblico",foto:""}];

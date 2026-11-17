@@ -171,6 +171,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--clay);outline-offse
 .chips input{width:auto;accent-color:var(--clay)}
 .chips label:has(input:checked){border-color:var(--clay);background:var(--clay-soft)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
+.two>.btn{padding-inline:8px}
 @media (max-width:380px){.two{grid-template-columns:1fr}}
 
 label{font-size:.85rem;font-weight:600}
@@ -408,7 +409,7 @@ textarea{min-height:96px;resize:vertical}
         <h2>Dónde estamos</h2>
         <div class="card">
           <div class="copyline"><span id="addr">9227 2nd Avenue, Orlando, FL 32824</span><button type="button" data-copy="addr">Copiar</button></div>
-          <a class="btn" href="https://www.google.com/maps/search/?api=1&query=9227+2nd+Avenue+Orlando+FL+32824" target="_blank" rel="noopener">Cómo llegar</a>
+          <div class="two"><a class="btn" href="https://www.google.com/maps/search/?api=1&query=9227+2nd+Avenue+Orlando+FL+32824" target="_blank" rel="noopener">Google Maps</a><a class="btn" href="https://maps.apple.com/?q=CDA+Casa+del+Alfarero&address=9227+2nd+Avenue,+Orlando,+FL+32824" target="_blank" rel="noopener">Apple Maps</a></div>
           <div class="copyline"><span id="tel">(321) 315-1506</span><button type="button" data-copy="tel">Copiar</button></div>
           <div class="copyline"><span id="mail">cdaorlandoministry@gmail.com</span><button type="button" data-copy="mail">Copiar</button></div>
         </div>

@@ -30,6 +30,7 @@
 :root[data-theme="dark"]{
   --bg:#0a0a0a; --surface:#171717; --ink:#f2f2f0; --muted:#a8a8a2; --line:#2a2a28;
   --brand:#000000; --brand-ink:#ffffff; --clay:#f5c518; --clay-soft:#2e2608; --accent:#f5c518; --accent-ink:#0d0d0d; --ok:#5fbf86; --live:#ff6b6b; color-scheme:dark}
+.pastores-foto{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px;background:#000;display:block}
 .people{display:flex;flex-direction:column;gap:14px}
 .person{display:flex;align-items:center;gap:14px}
 .person .ph{width:64px;height:64px;border-radius:50%;flex:none;background:var(--brand) center/cover no-repeat;color:var(--accent);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.3rem}
@@ -372,7 +373,7 @@ textarea{min-height:96px;resize:vertical}
       <div class="wrap stack">
         <span class="eyebrow">Liderazgo</span>
         <h2>Nuestros pastores</h2>
-        <div class="card people" id="pastores"></div>
+        <div class="card people"><img class="pastores-foto" src="fotos/pastores.jpg" alt="Obispo Octavio Guillén y Pastora Andrea Orellana" loading="lazy"><div class="people" id="pastores"></div></div>
         <h2 id="lideresTitle" hidden>Líderes de ministerios</h2>
         <div class="card people" id="lideres" hidden></div>
       </div>

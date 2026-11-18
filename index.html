@@ -688,7 +688,7 @@ const HOJA_URL="";
 const CORREO_FORM="https://formsubmit.co/ajax/cdaorlandoministry@gmail.com";
 const ETIQ={fullName:"Nombre",name:"Nombre",phone:"Teléfono",email:"Correo",contact:"Teléfono o correo",birthday:"Cumpleaños",address:"Dirección",job:"Profesión",since:"Congrega desde",conversion:"Conversión",baptized:"Bautizado en agua",baptismDate:"Fecha de bautismo",spirit:"Espíritu Santo",civil:"Estado civil",spouse:"Cónyuge",wedding:"Aniversario de bodas",children:"Hijos",gifts:"Dones",group:"Grupo",ministries:"Ministerios",institute:"Instituto Bíblico",text:"Mensaje"};
 const ENVIO_ACTIVO=true;
-function enviarHoja(datos){if(!HOJA_URL){const tipo={perfil:"Perfil",oracion:"Pedido de oración",pregunta:"Pregunta"}[datos.tipo]||"Mensaje";const quien=datos.fullName||datos.name||"";const f={_subject:"App CDA: "+tipo+(quien?" de "+quien:""),_template:"table",_captcha:"false",Tipo:tipo};for(const k in ETIQ){let v=datos[k];if(Array.isArray(v))v=v.join(", ");if(v===true)v="Sí";if(v===false||v==null||v==="")continue;f[ETIQ[k]]=String(v).slice(0,2000)}if(datos.email&&/@/.test(datos.email))f._replyto=datos.email;return fetch(CORREO_FORM,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(f)}).then(r=>r.ok,()=>false)}return fetch(HOJA_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(datos)}).then(()=>true,()=>false)}
+function enviarHoja(datos){if(!HOJA_URL){const tipo={perfil:"Perfil",oracion:"Pedido de oración",pregunta:"Pregunta"}[datos.tipo]||"Mensaje";const quien=datos.fullName||datos.name||"";const f={_subject:"App CDA: "+tipo+(quien?" de "+quien:""),_template:"table",_captcha:"false",Tipo:tipo};for(const k in ETIQ){let v=datos[k];if(Array.isArray(v))v=v.join(", ");if(v===true)v="Sí";if(v===false||v==null||v==="")continue;f[ETIQ[k]]=String(v).slice(0,2000)}if(datos.email&&/@/.test(datos.email))f._replyto=datos.email;return fetch(CORREO_FORM,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(f)}).then(r=>r.json()).then(j=>String(j.success)==="true",()=>false)}return fetch(HOJA_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(datos)}).then(()=>true,()=>false)}
 if(ENVIO_ACTIVO){$("optAsk").hidden=false}
 $("optAsk").addEventListener("click",()=>{$("askForm").hidden=false;$("askOk").hidden=true;$("askText").focus()});
 $("askForm").addEventListener("submit",e=>{e.preventDefault();const t=$("askText").value.trim();if(!t){$("askText").focus();return}enviarHoja({tipo:"pregunta",name:$("askName").value.trim(),contact:$("askContact").value.trim(),text:t});$("askOk").hidden=false;e.target.reset()});
@@ -742,43 +742,6 @@ const LIDERES=[ // Según el Manual Operativo CDA (cap. 2.3). Foto: "fotos/nombr
 function renderPeople(el,list){el.innerHTML="";list.forEach(p=>{const d=document.createElement("div");d.className="person";const ph=document.createElement("div");ph.className="ph";if(p.foto){ph.style.backgroundImage="url('"+p.foto+"')";ph.setAttribute("role","img");ph.setAttribute("aria-label",p.nombre)}else{ph.textContent=p.nombre.replace(/^(Obispo|Pastora?|Hno\.|Hna\.)\s+/,"").split(/\s+/).filter(w=>w!=="y").map(w=>w[0]).slice(0,2).join("")}const t=document.createElement("div");const b=document.createElement("b");b.textContent=p.nombre;const s=document.createElement("small");s.textContent=p.cargo;t.append(b,s);d.append(ph,t);el.append(d)})}
 renderPeople(document.getElementById("pastores"),PASTORES);
 if(LIDERES.length){renderPeople(document.getElementById("lideres"),LIDERES);document.getElementById("lideres").hidden=false;document.getElementById("lideresTitle").hidden=false}
-</script>
-<script>
-// ===== Contenido desde la hoja de Google "CDA APP INFO" =====
-// Se edita en la hoja; la app la lee al abrir. Si no hay conexión, usa la última copia guardada o lo de arriba.
-const HOJA_INFO="1QO2k13rs-m6PFgoyDALVTD1N2RjIt3jXY9jWz7iWjQE";
-(function(){
-  const TABS=["Horarios","Eventos","Anuncios","Ministerios","General"];
-  const csv=t=>{const rows=[];let row=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==","){row.push(f);f=""}else if(c=="\n"){row.push(f);rows.push(row);row=[];f=""}else if(c!="\r")f+=c}if(f||row.length){row.push(f);rows.push(row)}return rows};
-  const si=v=>/^s[ií]/i.test(String(v||"").trim());
-  const hm=v=>{const m=String(v||"").trim().toLowerCase().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|a\.\s*m\.|p\.\s*m\.)?/);if(!m)return null;let h=+m[1],mi=+(m[2]||0);const ap=(m[3]||"").replace(/[\s.]/g,"");if(ap=="pm"&&h<12)h+=12;if(ap=="am"&&h==12)h=0;return h<24&&mi<60?{h,m:mi}:null};
-  const DIAS=["domingo","lunes","martes","miercoles","jueves","viernes","sabado"];
-  const dia=v=>DIAS.indexOf(String(v||"").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,""));
-  function aplicar(d){
-    try{
-      const H=(d.Horarios||[]).slice(1).filter(r=>r[0]&&r[3]);
-      const reu=[];const filas=[];
-      H.forEach(r=>{const di=dia(r[0]),a=hm(r[1]),b=hm(r[2]);if(di<0||!a)return;let dur=b?((b.h*60+b.m)-(a.h*60+a.m)):90;if(dur<=0)dur+=1440;if(si(r[6]))dur+=30;const mod=(r[5]||"").trim();
-        reu.push({d:di,h:a.h,m:a.m,dur,n:r[3].trim(),vivo:si(r[6]),video:/video/i.test(mod),zoom:/zoom/i.test(mod),det:[mod,(r[4]||"").trim()].filter(Boolean).join(". ")});
-        const k=r[1]+"|"+r[2]+"|"+r[3]+"|"+r[4]+"|"+mod;const f=filas.find(x=>x.k==k);if(f)f.dias.push(r[0].trim());else filas.push({k,dias:[r[0].trim()],ini:r[1].trim(),fin:(r[2]||"").trim(),n:r[3].trim(),desc:(r[4]||"").trim(),mod})});
-      if(reu.length){REUNIONES.length=0;reu.forEach(x=>REUNIONES.push(x));
-        $("sched").innerHTML=filas.map(f=>`<div class="row"><div class="day">${esc(f.dias.map((x,i)=>i?x.toLowerCase():x).join(" y "))}<small>${esc(f.ini+(f.fin?"–"+f.fin:""))}</small></div><div class="txt"><b>${esc(f.n)}</b><small>${esc([f.desc,f.mod].filter(Boolean).join(" · "))}</small></div></div>`).join("")}
-      const hoy=ymd(new Date());
-      if(d.Eventos){EVENTOS=d.Eventos.slice(1).filter(r=>/^\d{4}-\d{2}-\d{2}$/.test((r[0]||"").trim())&&r[2]&&si(r[5])&&r[0].trim()>=hoy).map(r=>({fecha:r[0].trim(),hora:(r[1]||"").trim(),titulo:r[2].trim(),detalle:(r[3]||"").trim(),tag:(r[4]||"Especial").trim()||"Especial"}))}
-      const an=(d.Anuncios||[]).slice(1).filter(r=>r[2]&&si(r[5])&&(!r[0]||r[0].trim()<=hoy)&&(!r[1]||r[1].trim()>=hoy));
-      const box=$("anuncios");box.innerHTML=an.map(r=>{const u=(r[4]||"").trim();const ok=/^https:\/\//i.test(u);return `<div class="card"><span class="eyebrow">Anuncio</span><h3 style="margin:.3em 0">${esc(r[2])}</h3><p style="margin:0">${esc(r[3]||"")}</p>${ok?`<p style="margin:.8em 0 0"><a class="btn" href="${esc(u)}" target="_blank" rel="noopener">Ver más</a></p>`:""}</div>`}).join("");box.hidden=!an.length;
-      const M=(d.Ministerios||[]).slice(1).filter(r=>r[0]&&r[1]);
-      if(M.length){LIDERES.length=0;M.forEach(r=>LIDERES.push({nombre:r[1].trim(),cargo:r[0].trim(),foto:""}));renderPeople($("lideres"),LIDERES)}
-      const G={};(d.General||[]).slice(1).forEach(r=>{if(r[0])G[r[0].trim()]=(r[1]||"").trim()});
-      if(G["Versículo de la semana"]){$("vText").textContent="“"+G["Versículo de la semana"].replace(/^[“"]|[”"]$/g,"")+"”";if(G["Cita del versículo"])$("vCite").textContent=G["Cita del versículo"]}
-      renderHome();renderCal();vidMode=null;tick();
-    }catch(e){console.warn("hoja",e)}
-  }
-  const cache=store.get("cda-hoja");if(cache)aplicar(cache);
-  const desdeScript=HOJA_URL?fetch(HOJA_URL+"?c=1",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{if(!j||!j.Horarios)throw 0;return j}):Promise.reject();
-  desdeScript.catch(()=>Promise.all(TABS.map(t=>fetch(`https://docs.google.com/spreadsheets/d/${HOJA_INFO}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(t)}`,{cache:"no-store"}).then(r=>r.ok?r.text():Promise.reject()).then(csv))).then(res=>{const d={};TABS.forEach((t,i)=>d[t]=res[i]);return d}))
-    .then(d=>{store.set("cda-hoja",d);aplicar(d)}).catch(()=>{});
-})();
 </script>
 <script>
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}

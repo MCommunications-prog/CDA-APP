@@ -307,6 +307,7 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
         <div class="list sched">
           <div class="row"><div class="day">Domingo<small>12:00 pm</small></div><div class="txt"><b>Culto dominical</b><small>Alabanza, Palabra y ministración para toda la familia.</small></div></div>
           <div class="row"><div class="day">Lunes<small>7:00–10:00 pm</small></div><div class="txt"><b>Instituto Bíblico</b><small>Formación bíblica y ministerial. Proyecto Vasijas Nuevas.</small></div></div>
+          <div class="row"><div class="day">Martes y jueves<small>5:00 am</small></div><div class="txt"><b>Oración de madrugada</b><small>Por videollamada. Escríbenos para recibir la información para conectarte.</small></div></div>
           <div class="row"><div class="day">Miércoles<small>7:30 pm</small></div><div class="txt"><b>Oración y estudio de la Palabra</b><small>7:30–9:00 pm. Híbrido: en el templo y por Zoom.</small></div></div>
         </div>
       </div>
@@ -480,6 +481,7 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
     </section>
 
     <p class="motto wrap">Vasijas Nuevas · Transformados en las manos del Alfarero</p>
+    <p class="note wrap" style="text-align:center"><a href="https://cdaministry.org/privacidad/" target="_blank" rel="noopener" style="color:inherit">Política de privacidad</a></p>
   </main>
 
   <nav class="tabbar" aria-label="Secciones">
@@ -517,7 +519,9 @@ const MENSAJES = [];
 const REUNIONES = [
   {d:0,h:12,m:0,dur:120,n:"Culto dominical",vivo:true},
   {d:1,h:19,m:0,dur:180,n:"Instituto Bíblico",vivo:false},
-  {d:3,h:19,m:30,dur:90,n:"Oración y estudio de la Palabra",vivo:false,zoom:true}
+  {d:2,h:5,m:0,dur:60,n:"Oración de madrugada",vivo:false,video:true},
+  {d:3,h:19,m:30,dur:90,n:"Oración y estudio de la Palabra",vivo:false,zoom:true},
+  {d:4,h:5,m:0,dur:60,n:"Oración de madrugada",vivo:false,video:true}
 ];
 
 const MES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
@@ -530,7 +534,7 @@ function fmtHour(h,m){const ap=h>=12?"pm":"am";return `${h%12||12}:${String(m).p
 const store = {get(k){try{return JSON.parse(localStorage.getItem(k))}catch(_){return null}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(_){return false}}};
 
 function itemsFor(date){
-  const out = REUNIONES.filter(r=>r.d===date.getDay()).map(r=>({hora:fmtHour(r.h,r.m),titulo:r.n,detalle:r.zoom?"En el templo y por Zoom":"Presencial",tag:"Fijo",fixed:true}));
+  const out = REUNIONES.filter(r=>r.d===date.getDay()).map(r=>({hora:fmtHour(r.h,r.m),titulo:r.n,detalle:r.video?"Por videollamada. Escríbenos para recibir la información para conectarte":r.zoom?"En el templo y por Zoom":"Presencial",tag:"Fijo",fixed:true}));
   return out.concat(EVENTOS.filter(e=>e.fecha===ymd(date)));
 }
 function itemRow(date,it){
@@ -568,7 +572,7 @@ function tick(){
   const now=new Date(), {live,best,nextLive}=status(now);
   const isLive = live && live.vivo;
   $("heroLive").hidden=!isLive; $("tabLive").hidden=!isLive;
-  if(live){ $("nextLabel").textContent="Ahora mismo"; $("nextName").textContent=live.n; $("nextWhen").textContent=isLive?"Toca En vivo para verlo":"En el templo"; }
+  if(live){ $("nextLabel").textContent="Ahora mismo"; $("nextName").textContent=live.n; $("nextWhen").textContent=isLive?"Toca En vivo para verlo":live.video?"Por videollamada":"En el templo"; }
   else { $("nextLabel").textContent="Próxima reunión"; $("nextName").textContent=best.r.n; $("nextWhen").textContent=`${DIA[best.t.getDay()]} ${fmtHour(best.t.getHours(),best.t.getMinutes())} · ${until(best.t-now)}`; }
   $("liveState").innerHTML = isLive?'<span class="livepill">En vivo</span>':'<span class="offpill">Fuera del aire</span>';
     $("liveNote").textContent = isLive? `${live.n} en vivo. Toca el video para verlo.` : `Próxima transmisión: ${nextLive.r.n}, ${DIA[nextLive.t.getDay()]} ${fmtHour(nextLive.t.getHours(),nextLive.t.getMinutes())}. Mientras tanto, mira el último culto.`;

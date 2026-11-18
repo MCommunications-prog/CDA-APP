@@ -19,8 +19,8 @@
 <style>
 /* Layout: app de celular centrada (máx 480px), encabezado de marca, contenido por pestañas, barra inferior fija */
 :root{
-  --bg:#f7f5ef; --surface:#ffffff; --ink:#15130f; --muted:#5f5b52; --line:#ece8dd;
-  --brand:#f5c518; --brand-ink:#15130f; --clay:#8a6500; --clay-soft:#fdf3cf; --accent:#f5c518; --accent-ink:#0d0d0d; --ok:#2f7d4f; --live:#d23a3a;
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#171a21; --muted:#5a6072; --line:#e8eaf0;
+  --brand:#f5c518; --brand-ink:#15130f; --clay:#8a6100; --clay-soft:#fdf3cf; --accent:#f5c518; --accent-ink:#0d0d0d; --ok:#2f7d4f; --live:#d23a3a;
   --display:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
   --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -186,7 +186,7 @@ textarea{min-height:96px;resize:vertical}
 @keyframes fade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 /* ===== Diseño claro "Luz" (nov 2026): blanco, amarillo CDA y tarjetas de color ===== */
-:root{--soft:#faf8f2;--navy:#2f4566;--wine:#a3302b;--teal:#1d6f68;--shadow:0 10px 30px rgba(30,25,10,.08)}
+:root{--soft:#faf8f2;--navy:#2f4566;--wine:#a3302b;--teal:#1d6f68;--shadow:0 12px 32px rgba(23,32,64,.08)}
 body{background:var(--bg)}
 body::before{background:var(--surface)}
 h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
@@ -207,16 +207,19 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
 .quick{grid-template-columns:1fr 1fr;gap:12px}
 .quick button{flex-direction:row;justify-content:flex-start;gap:12px;padding:16px;border-radius:20px;color:#fff;font-size:1rem;font-weight:700;font-family:var(--display);min-height:64px;box-shadow:var(--shadow)}
 .quick .ico{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.18);border:0;color:#fff}
-.quick button:nth-child(1){background:linear-gradient(135deg,#c73a33,var(--wine))}
-.quick button:nth-child(2){background:linear-gradient(135deg,#3f5a84,var(--navy))}
-.quick button:nth-child(3){background:linear-gradient(135deg,#ffd84d,#f0b400);color:#1a1400}
+.quick button:nth-child(1){background:linear-gradient(135deg,#ff7a50,#f0643c)}
+.quick button:nth-child(2){background:linear-gradient(135deg,#5b8def,#3d6fd9)}
+.quick button:nth-child(3){background:linear-gradient(135deg,#ffe066,#f5c518 55%,#ffb81c);color:#171a21}
 .quick button:nth-child(3) .ico{background:rgba(0,0,0,.08);color:#1a1400}
-.quick button:nth-child(4){background:linear-gradient(135deg,#25877f,var(--teal))}
-.card,.list{border-radius:20px;box-shadow:var(--shadow);border-color:var(--line)}
+.quick button:nth-child(4){background:linear-gradient(135deg,#1fbcb1,#14a39a)}
+.card,.list{border-radius:22px;box-shadow:var(--shadow);border-color:transparent}
+.btn{border-radius:999px}
+.btn.ghost{border:2px solid var(--ink);background:transparent;color:var(--ink)}
+.hero{background:linear-gradient(135deg,#ffe066,#f5c518 55%,#ffb81c)}
 .verse{border-radius:20px}
-.profile-card{background:linear-gradient(135deg,#ffd84d,var(--brand));color:var(--brand-ink);border-radius:24px}
+.profile-card{background:linear-gradient(135deg,#ffe066,#f5c518 55%,#ffb81c);color:var(--brand-ink);border-radius:24px}
 .profile-card .facts div{background:rgba(255,255,255,.6)}
-.person .ph{background-color:var(--brand);color:var(--brand-ink)}
+.person .ph{background-color:#ffe066;color:var(--brand-ink)}
 .opt .oi{background:var(--soft);color:var(--ink)}
 .grid7 button[aria-pressed="true"]{background:var(--ink);color:#fff}
 .tabbar{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}

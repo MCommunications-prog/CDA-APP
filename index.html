@@ -516,6 +516,14 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
     <a class="opt" href="tel:+13213151506"><span class="oi">📞</span><span>Llamar a la iglesia<small>(321) 315-1506</small></span></a>
     <a class="opt" href="mailto:cdaorlandoministry@gmail.com"><span class="oi">📧</span><span>Enviar un correo<small>cdaorlandoministry@gmail.com</small></span></a>
     <a class="opt" href="https://ig.me/m/cdaministry" target="_blank" rel="noopener"><span class="oi">💬</span><span>Escribir por Instagram<small>@cdaministry</small></span></a>
+    <button class="opt" type="button" id="optAsk" hidden><span class="oi">❓</span><span>Escribir una pregunta aquí<small>Te respondemos pronto</small></span></button>
+    <form id="askForm" class="stack" hidden style="gap:10px">
+      <div class="field"><label for="askName">Tu nombre</label><input id="askName" autocomplete="name"></div>
+      <div class="field"><label for="askContact">Teléfono o correo para responderte</label><input id="askContact" autocomplete="tel"></div>
+      <div class="field"><label for="askText">Tu pregunta</label><textarea id="askText" required></textarea></div>
+      <button class="btn" type="submit">Enviar pregunta</button>
+      <p class="ok" id="askOk" hidden>¡Gracias! Recibimos tu pregunta y te respondemos pronto.</p>
+    </form>
     <button class="opt" type="button" id="optPray"><span class="oi">🙏</span><span>Pedir oración<small>Te acompañamos en oración</small></span></button>
     <button class="close" type="button" id="sheetClose">Cerrar</button>
   </div>
@@ -677,6 +685,9 @@ $("photo").addEventListener("change",e=>{
 // Envío a la hoja de Google de CDA (correo cdaorlandoministry@gmail.com). Pegar aquí la URL /exec del Apps Script.
 const HOJA_URL="";
 function enviarHoja(datos){if(!HOJA_URL)return Promise.resolve(false);return fetch(HOJA_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(datos)}).then(()=>true,()=>false)}
+if(HOJA_URL){$("optAsk").hidden=false}
+$("optAsk").addEventListener("click",()=>{$("askForm").hidden=false;$("askOk").hidden=true;$("askText").focus()});
+$("askForm").addEventListener("submit",e=>{e.preventDefault();const t=$("askText").value.trim();if(!t){$("askText").focus();return}enviarHoja({tipo:"pregunta",name:$("askName").value.trim(),contact:$("askContact").value.trim(),text:t});$("askOk").hidden=false;e.target.reset()});
 if(HOJA_URL){const n=document.querySelector("#profileForm .note");if(n)n.textContent="Al guardar, tu perfil se guarda en este teléfono y se envía a la oficina de CDA."}
 $("profileForm").addEventListener("submit",e=>{
   e.preventDefault();
@@ -760,8 +771,9 @@ const HOJA_INFO="1QO2k13rs-m6PFgoyDALVTD1N2RjIt3jXY9jWz7iWjQE";
     }catch(e){console.warn("hoja",e)}
   }
   const cache=store.get("cda-hoja");if(cache)aplicar(cache);
-  Promise.all(TABS.map(t=>fetch(`https://docs.google.com/spreadsheets/d/${HOJA_INFO}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(t)}`,{cache:"no-store"}).then(r=>r.ok?r.text():Promise.reject()).then(csv)))
-    .then(res=>{const d={};TABS.forEach((t,i)=>d[t]=res[i]);store.set("cda-hoja",d);aplicar(d)}).catch(()=>{});
+  const desdeScript=HOJA_URL?fetch(HOJA_URL+"?c=1",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{if(!j||!j.Horarios)throw 0;return j}):Promise.reject();
+  desdeScript.catch(()=>Promise.all(TABS.map(t=>fetch(`https://docs.google.com/spreadsheets/d/${HOJA_INFO}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(t)}`,{cache:"no-store"}).then(r=>r.ok?r.text():Promise.reject()).then(csv))).then(res=>{const d={};TABS.forEach((t,i)=>d[t]=res[i]);return d}))
+    .then(d=>{store.set("cda-hoja",d);aplicar(d)}).catch(()=>{});
 })();
 </script>
 <script>

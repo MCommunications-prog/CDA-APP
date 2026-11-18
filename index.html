@@ -184,6 +184,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--clay);outline-offse
 label{font-size:.85rem;font-weight:600}
 input,textarea,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;min-width:0}
 textarea{min-height:96px;resize:vertical}
+/* iPhone: con letra menor de 16px Safari agranda la pantalla al escribir y queda cortada */
+input,textarea,select{font-size:16px}
+.avatar-btn,.top .wrap>*{max-width:100%}.avatar-btn{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .note{font-size:.8rem;color:var(--muted)}
 .ok{color:var(--ok);font-weight:600;font-size:.9rem}

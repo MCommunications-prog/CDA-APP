@@ -512,11 +512,14 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
   <div class="panel">
     <h2 id="sheetT">¿Cómo te ayudamos?</h2>
     <p>Escríbenos o llámanos. Con gusto te respondemos.</p>
-    <a class="opt" href="sms:+13213151506"><span class="oi">✉️</span><span>Enviar un mensaje de texto<small>(321) 315-1506</small></span></a>
-    <a class="opt" href="tel:+13213151506"><span class="oi">📞</span><span>Llamar a la iglesia<small>(321) 315-1506</small></span></a>
-    <a class="opt" href="mailto:cdaorlandoministry@gmail.com"><span class="oi">📧</span><span>Enviar un correo<small>cdaorlandoministry@gmail.com</small></span></a>
-    <a class="opt" href="https://ig.me/m/cdaministry" target="_blank" rel="noopener"><span class="oi">💬</span><span>Escribir por Instagram<small>@cdaministry</small></span></a>
-    <button class="opt" type="button" id="optAsk" hidden><span class="oi">❓</span><span>Escribir una pregunta aquí<small>Te respondemos pronto</small></span></button>
+    <button class="opt" type="button" id="optPray"><span class="oi">🙏</span><span>Escribir un pedido de oración<small>Te acompañamos en oración</small></span></button>
+    <form id="prayForm2" class="stack" hidden style="gap:10px">
+      <div class="field"><label for="pr2Name">Tu nombre (opcional)</label><input id="pr2Name" autocomplete="name"></div>
+      <div class="field"><label for="pr2Text">¿Por qué podemos orar?</label><textarea id="pr2Text" required></textarea></div>
+      <button class="btn" type="submit">Enviar pedido</button>
+      <p class="ok" id="pr2Ok" hidden>Recibimos tu pedido. ¡Estamos orando contigo!</p>
+    </form>
+    <button class="opt" type="button" id="optAsk"><span class="oi">❓</span><span>Escribir una pregunta aquí<small>Te respondemos pronto</small></span></button>
     <form id="askForm" class="stack" hidden style="gap:10px">
       <div class="field"><label for="askName">Tu nombre</label><input id="askName" autocomplete="name"></div>
       <div class="field"><label for="askContact">Teléfono o correo para responderte</label><input id="askContact" autocomplete="tel"></div>
@@ -524,7 +527,10 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
       <button class="btn" type="submit">Enviar pregunta</button>
       <p class="ok" id="askOk" hidden>¡Gracias! Recibimos tu pregunta y te respondemos pronto.</p>
     </form>
-    <button class="opt" type="button" id="optPray"><span class="oi">🙏</span><span>Pedir oración<small>Te acompañamos en oración</small></span></button>
+    <a class="opt" href="sms:+13213151506"><span class="oi">✉️</span><span>Enviar un mensaje de texto<small>(321) 315-1506</small></span></a>
+    <a class="opt" href="tel:+13213151506"><span class="oi">📞</span><span>Llamar a la iglesia<small>(321) 315-1506</small></span></a>
+    <a class="opt" href="mailto:cdaorlandoministry@gmail.com"><span class="oi">📧</span><span>Enviar un correo<small>cdaorlandoministry@gmail.com</small></span></a>
+    <a class="opt" href="https://ig.me/m/cdaministry" target="_blank" rel="noopener"><span class="oi">💬</span><span>Escribir por Instagram<small>@cdaministry</small></span></a>
     <button class="close" type="button" id="sheetClose">Cerrar</button>
   </div>
 </div>
@@ -622,7 +628,8 @@ $("fab").addEventListener("click",()=>{sheet.hidden=false;$("sheetClose").focus(
 $("sheetClose").addEventListener("click",()=>{sheet.hidden=true;$("fab").focus()});
 sheet.addEventListener("click",e=>{if(e.target===sheet)sheet.hidden=true});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")sheet.hidden=true});
-$("optPray").addEventListener("click",()=>{sheet.hidden=true;location.hash="visitanos";setTimeout(()=>$("prayer").scrollIntoView({behavior:"smooth",block:"start"}),150)});
+$("optPray").addEventListener("click",()=>{$("askForm").hidden=true;$("prayForm2").hidden=false;$("pr2Ok").hidden=true;$("pr2Text").focus()});
+$("prayForm2").addEventListener("submit",e=>{e.preventDefault();const t=$("pr2Text").value.trim();if(!t){$("pr2Text").focus();return}enviarHoja({tipo:"oracion",name:$("pr2Name").value.trim(),text:t});$("pr2Ok").hidden=false;e.target.reset()});
 tick(); setInterval(tick,30000);
 
 // Calendario
@@ -690,7 +697,7 @@ const ETIQ={fullName:"Nombre",name:"Nombre",phone:"Teléfono",email:"Correo",con
 const ENVIO_ACTIVO=true;
 function enviarHoja(datos){if(!HOJA_URL){const tipo={perfil:"Perfil",oracion:"Pedido de oración",pregunta:"Pregunta"}[datos.tipo]||"Mensaje";const quien=datos.fullName||datos.name||"";const f={_subject:"App CDA: "+tipo+(quien?" de "+quien:""),_template:"table",_captcha:"false",Tipo:tipo};for(const k in ETIQ){let v=datos[k];if(Array.isArray(v))v=v.join(", ");if(v===true)v="Sí";if(v===false||v==null||v==="")continue;f[ETIQ[k]]=String(v).slice(0,2000)}if(datos.email&&/@/.test(datos.email))f._replyto=datos.email;return fetch(CORREO_FORM,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(f)}).then(r=>r.json()).then(j=>String(j.success)==="true",()=>false)}return fetch(HOJA_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(datos)}).then(()=>true,()=>false)}
 if(ENVIO_ACTIVO){$("optAsk").hidden=false}
-$("optAsk").addEventListener("click",()=>{$("askForm").hidden=false;$("askOk").hidden=true;$("askText").focus()});
+$("optAsk").addEventListener("click",()=>{$("prayForm2").hidden=true;$("askForm").hidden=false;$("askOk").hidden=true;$("askText").focus()});
 $("askForm").addEventListener("submit",e=>{e.preventDefault();const t=$("askText").value.trim();if(!t){$("askText").focus();return}enviarHoja({tipo:"pregunta",name:$("askName").value.trim(),contact:$("askContact").value.trim(),text:t});$("askOk").hidden=false;e.target.reset()});
 if(ENVIO_ACTIVO){const n=document.querySelector("#profileForm .note");if(n)n.textContent="Al guardar, tu perfil se guarda en este teléfono y se envía a la oficina de CDA."}
 $("profileForm").addEventListener("submit",e=>{

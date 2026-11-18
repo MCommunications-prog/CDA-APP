@@ -684,11 +684,15 @@ $("photo").addEventListener("change",e=>{
 });
 // Envío a la hoja de Google de CDA (correo cdaorlandoministry@gmail.com). Pegar aquí la URL /exec del Apps Script.
 const HOJA_URL="";
-function enviarHoja(datos){if(!HOJA_URL)return Promise.resolve(false);return fetch(HOJA_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(datos)}).then(()=>true,()=>false)}
-if(HOJA_URL){$("optAsk").hidden=false}
+// Mientras no haya hoja conectada, todo llega por correo a cdaorlandoministry@gmail.com (FormSubmit, gratis).
+const CORREO_FORM="https://formsubmit.co/ajax/cdaorlandoministry@gmail.com";
+const ETIQ={fullName:"Nombre",name:"Nombre",phone:"Teléfono",email:"Correo",contact:"Teléfono o correo",birthday:"Cumpleaños",address:"Dirección",job:"Profesión",since:"Congrega desde",conversion:"Conversión",baptized:"Bautizado en agua",baptismDate:"Fecha de bautismo",spirit:"Espíritu Santo",civil:"Estado civil",spouse:"Cónyuge",wedding:"Aniversario de bodas",children:"Hijos",gifts:"Dones",group:"Grupo",ministries:"Ministerios",institute:"Instituto Bíblico",text:"Mensaje"};
+const ENVIO_ACTIVO=true;
+function enviarHoja(datos){if(!HOJA_URL){const tipo={perfil:"Perfil",oracion:"Pedido de oración",pregunta:"Pregunta"}[datos.tipo]||"Mensaje";const quien=datos.fullName||datos.name||"";const f={_subject:"App CDA: "+tipo+(quien?" de "+quien:""),_template:"table",_captcha:"false",Tipo:tipo};for(const k in ETIQ){let v=datos[k];if(Array.isArray(v))v=v.join(", ");if(v===true)v="Sí";if(v===false||v==null||v==="")continue;f[ETIQ[k]]=String(v).slice(0,2000)}if(datos.email&&/@/.test(datos.email))f._replyto=datos.email;return fetch(CORREO_FORM,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(f)}).then(r=>r.ok,()=>false)}return fetch(HOJA_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(datos)}).then(()=>true,()=>false)}
+if(ENVIO_ACTIVO){$("optAsk").hidden=false}
 $("optAsk").addEventListener("click",()=>{$("askForm").hidden=false;$("askOk").hidden=true;$("askText").focus()});
 $("askForm").addEventListener("submit",e=>{e.preventDefault();const t=$("askText").value.trim();if(!t){$("askText").focus();return}enviarHoja({tipo:"pregunta",name:$("askName").value.trim(),contact:$("askContact").value.trim(),text:t});$("askOk").hidden=false;e.target.reset()});
-if(HOJA_URL){const n=document.querySelector("#profileForm .note");if(n)n.textContent="Al guardar, tu perfil se guarda en este teléfono y se envía a la oficina de CDA."}
+if(ENVIO_ACTIVO){const n=document.querySelector("#profileForm .note");if(n)n.textContent="Al guardar, tu perfil se guarda en este teléfono y se envía a la oficina de CDA."}
 $("profileForm").addEventListener("submit",e=>{
   e.preventDefault();
   profile={...Object.fromEntries(["fullName","phone","email","birthday","address","job","since","conversion","baptized","baptismDate","spirit","civil","spouse","wedding","children","gifts","group"].map(k=>[k,$(k).value.trim()])),
@@ -721,7 +725,7 @@ document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",(
 }));
 
 // Pedido de oración (vista previa)
-$("prayer").addEventListener("submit",e=>{e.preventDefault();const n=$("prName").value.trim(),t=$("prText").value.trim();if(!t){$("prText").focus();return}const body="Pedido de oración"+(n?" de "+n:"")+": "+t;if(HOJA_URL){enviarHoja({tipo:"oracion",name:n,text:t});$("prOk").textContent="Recibimos tu pedido. ¡Estamos orando contigo!"}else{location.href="sms:+13213151506?&body="+encodeURIComponent(body)}$("prOk").hidden=false;e.target.reset();});
+$("prayer").addEventListener("submit",e=>{e.preventDefault();const n=$("prName").value.trim(),t=$("prText").value.trim();if(!t){$("prText").focus();return}const body="Pedido de oración"+(n?" de "+n:"")+": "+t;if(ENVIO_ACTIVO){enviarHoja({tipo:"oracion",name:n,text:t});$("prOk").textContent="Recibimos tu pedido. ¡Estamos orando contigo!"}else{location.href="sms:+13213151506?&body="+encodeURIComponent(body)}$("prOk").hidden=false;e.target.reset();});
 
 // Fotos: poner el archivo en fotos/ y escribir su nombre en "foto". Sin foto se muestran las iniciales.
 const PASTORES=[{nombre:"Obispo Octavio Guillén",cargo:"Pastor",foto:""},{nombre:"Andrea Orellana",cargo:"Pastora Ejecutiva y directora del Instituto Bíblico",foto:""}];

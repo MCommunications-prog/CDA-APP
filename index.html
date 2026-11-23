@@ -543,8 +543,13 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
 <script>
 // ===== Contenido editable (ejemplo) =====
 let EVENTOS = [
-  {fecha:"2026-11-21", hora:"7:30 pm", titulo:"Culto en casa del pastor", detalle:"Para la dirección, escribe por privado. ¡Los esperamos a todos!", tag:"Especial"}
-]; // Agregar aquí eventos confirmados: {fecha:"2026-12-13", hora:"5:00 pm", titulo:"...", detalle:"...", tag:"Especial"}
+  {fecha:"2026-11-21", hora:"7:30 pm", titulo:"Culto en casa del pastor", detalle:"Para la dirección, escribe por privado. ¡Los esperamos a todos!", tag:"Especial"},
+  {fecha:"2026-11-24", hora:"5:00 am", titulo:"Esta semana no hay oración de madrugada", detalle:"Volvemos la próxima semana.", tag:"Aviso"},
+  {fecha:"2026-11-25", hora:"7:30 pm", titulo:"Celebración de Thanksgiving", detalle:"Celebración de Acción de Gracias. ¡Los esperamos a todos!", tag:"Especial"},
+  {fecha:"2026-11-26", hora:"5:00 am", titulo:"Esta semana no hay oración de madrugada", detalle:"Volvemos la próxima semana.", tag:"Aviso"}
+];
+// Días en que NO hay reunión fija (se reemplaza o se suspende). Formato AAAA-MM-DD.
+const SIN_FIJO = ["2026-11-24","2026-11-25","2026-11-26"]; // Agregar aquí eventos confirmados: {fecha:"2026-12-13", hora:"5:00 pm", titulo:"...", detalle:"...", tag:"Especial"}
 const MENSAJES = [];
 // d: día (0=domingo); dur en minutos; vivo: se transmite
 const REUNIONES = [
@@ -565,7 +570,7 @@ function fmtHour(h,m){const ap=h>=12?"pm":"am";return `${h%12||12}:${String(m).p
 const store = {get(k){try{return JSON.parse(localStorage.getItem(k))}catch(_){return null}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(_){return false}}};
 
 function itemsFor(date){
-  const out = REUNIONES.filter(r=>r.d===date.getDay()).map(r=>({hora:fmtHour(r.h,r.m),titulo:r.n,detalle:r.det?r.det:r.video?"Por videollamada. Escríbenos para recibir la información para conectarte":r.zoom?"En el templo y por Zoom":"Presencial",tag:"Fijo",fixed:true}));
+  const out = SIN_FIJO.includes(ymd(date))?[]:REUNIONES.filter(r=>r.d===date.getDay()).map(r=>({hora:fmtHour(r.h,r.m),titulo:r.n,detalle:r.det?r.det:r.video?"Por videollamada. Escríbenos para recibir la información para conectarte":r.zoom?"En el templo y por Zoom":"Presencial",tag:"Fijo",fixed:true}));
   return out.concat(EVENTOS.filter(e=>e.fecha===ymd(date)));
 }
 function itemRow(date,it){
@@ -592,10 +597,13 @@ function status(now){
   for(const r of REUNIONES){
     const t=new Date(now); t.setHours(r.h,r.m,0,0); t.setDate(t.getDate()+((r.d-now.getDay()+7)%7));
     const end=new Date(t.getTime()+r.dur*6e4);
-    if(now>=t && now<end) live=r;
+    if(now>=t && now<end && !SIN_FIJO.includes(ymd(t))) live=r;
     if(t<=now) t.setDate(t.getDate()+7);
+    while(SIN_FIJO.includes(ymd(t))) t.setDate(t.getDate()+7);
     if(!best||t<best.t) best={t,r};
   }
+  // Eventos especiales también cuentan como próxima reunión
+  for(const e of EVENTOS){ if(e.tag==="Aviso")continue; const m=String(e.hora).match(/(\d+):(\d+)\s*(am|pm)/i); if(!m)continue; let h=+m[1]%12; if(/pm/i.test(m[3]))h+=12; const [y,mo,d]=e.fecha.split("-").map(Number); const t=new Date(y,mo-1,d,h,+m[2]); const end=new Date(t.getTime()+120*6e4); const r={n:e.titulo,vivo:false}; if(now>=t&&now<end)live=r; if(t>now&&(!best||t<best.t))best={t,r}; }
   const nextLive = (()=>{let b=null;for(const r of REUNIONES.filter(x=>x.vivo)){const t=new Date(now);t.setHours(r.h,r.m,0,0);t.setDate(t.getDate()+((r.d-now.getDay()+7)%7));if(t<=now)t.setDate(t.getDate()+7);if(!b||t<b.t)b={t,r}}return b})();
   return {live,best,nextLive};
 }

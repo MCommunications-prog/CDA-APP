@@ -42,6 +42,10 @@
 .person{display:flex;align-items:center;gap:14px}
 .person .ph{width:64px;height:64px;border-radius:50%;flex:none;background:var(--brand) center/cover no-repeat;color:var(--accent);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.3rem}
 .person b{display:block}.person small{color:var(--muted)}
+.pcards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pcard{margin:0;background:var(--surface);border-radius:22px;overflow:hidden;box-shadow:0 12px 32px rgba(23,32,64,.08);display:flex;flex-direction:column}
+.pcard img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;background:#eef0f4;border-bottom:4px solid var(--brand)}
+.pcard figcaption{padding:12px 14px 16px}.pcard b{display:block;font-family:var(--display);font-weight:800;line-height:1.2}.pcard small{display:block;color:var(--muted);margin-top:4px;line-height:1.35}
 .video{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#000}
 .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .vidhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -473,7 +477,10 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
       <div class="wrap stack">
         <span class="eyebrow">Liderazgo</span>
         <h2>Nuestros pastores</h2>
-        <div class="card people"><img class="pastores-foto" src="fotos/pastores.jpg" alt="Obispo Octavio Guillén y Pastora Andrea Orellana" loading="lazy"><div class="people" id="pastores"></div></div>
+        <div class="pcards">
+          <figure class="pcard"><img src="fotos/perfil-octavio-guillen.jpg" alt="Obispo Octavio Guillén" loading="lazy" width="480" height="600"><figcaption><b>Obispo Octavio Guillén</b><small>Pastor principal</small></figcaption></figure>
+          <figure class="pcard"><img src="fotos/perfil-andrea-orellana.jpg" alt="Pastora Andrea Orellana" loading="lazy" width="480" height="600"><figcaption><b>Pastora Andrea Orellana</b><small>Pastora ejecutiva · Directora del Instituto Bíblico</small></figcaption></figure>
+        </div>
         <h2 id="lideresTitle" hidden>Líderes de ministerios</h2>
         <div class="card people" id="lideres" hidden></div>
       </div>
@@ -758,7 +765,6 @@ const LIDERES=[ // Según el Manual Operativo CDA (cap. 2.3). Foto: "fotos/nombr
   {nombre:"Marilyn Cardona",cargo:"Comunicación",foto:""}
 ];
 function renderPeople(el,list){el.innerHTML="";list.forEach(p=>{const d=document.createElement("div");d.className="person";const ph=document.createElement("div");ph.className="ph";if(p.foto){ph.style.backgroundImage="url('"+p.foto+"')";ph.setAttribute("role","img");ph.setAttribute("aria-label",p.nombre)}else{ph.textContent=p.nombre.replace(/^(Obispo|Pastora?|Hno\.|Hna\.)\s+/,"").split(/\s+/).filter(w=>w!=="y").map(w=>w[0]).slice(0,2).join("")}const t=document.createElement("div");const b=document.createElement("b");b.textContent=p.nombre;const s=document.createElement("small");s.textContent=p.cargo;t.append(b,s);d.append(ph,t);el.append(d)})}
-renderPeople(document.getElementById("pastores"),PASTORES);
 if(LIDERES.length){renderPeople(document.getElementById("lideres"),LIDERES);document.getElementById("lideres").hidden=false;document.getElementById("lideresTitle").hidden=false}
 </script>
 <script>

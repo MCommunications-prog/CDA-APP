@@ -608,11 +608,11 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
 let EVENTOS = [
   {fecha:"2026-11-21", hora:"7:30 pm", titulo:"Culto en casa del pastor", detalle:"Para la dirección, escribe por privado. ¡Los esperamos a todos!", tag:"Especial"},
   {fecha:"2026-11-24", hora:"5:00 am", titulo:"Esta semana no hay oración de madrugada", detalle:"Volvemos la próxima semana.", tag:"Aviso"},
-  {fecha:"2026-11-25", hora:"7:30 pm", titulo:"Celebración de Thanksgiving", detalle:"Celebración de Acción de Gracias. ¡Los esperamos a todos!", tag:"Especial", registro:true},
+  {fecha:"2026-11-25", hora:"7:30 pm", titulo:"Celebración de Thanksgiving", detalle:"Celebración de Acción de Gracias. ¡Los esperamos a todos!", tag:"Especial"},
   {fecha:"2026-11-26", hora:"5:00 am", titulo:"Esta semana no hay oración de madrugada", detalle:"Volvemos la próxima semana.", tag:"Aviso"}
 ];
 // Días en que NO hay reunión fija (se reemplaza o se suspende). Formato AAAA-MM-DD.
-const SIN_FIJO = ["2026-11-24","2026-11-25","2026-11-26"]; // Agregar aquí eventos confirmados: {fecha:"2026-12-13", hora:"5:00 pm", titulo:"...", detalle:"...", tag:"Especial", registro:true}  (registro:true pone el botón Regístrate)
+const SIN_FIJO = ["2026-11-24","2026-11-25","2026-11-26"]; // Agregar aquí eventos confirmados: {fecha:"2026-12-13", hora:"5:00 pm", titulo:"...", detalle:"...", tag:"Especial"}  (todos los eventos llevan botón Regístrate, menos los "Aviso"; para quitarlo: registro:false)
 const MENSAJES = [];
 // d: día (0=domingo); dur en minutos; vivo: se transmite
 const REUNIONES = [
@@ -638,7 +638,7 @@ function itemsFor(date){
 }
 function itemRow(date,it){
   return `<div class="row"><div class="date"><b>${date.getDate()}</b><span>${MES[date.getMonth()]}</span></div>
-    <div class="txt"><span class="tag ${it.fixed?"fixed":""}">${esc(it.tag)}</span><b>${esc(it.titulo)}</b><small>${esc(it.hora)} · ${esc(it.detalle)}</small>${it.registro?(yaReg(it)?`<button type="button" class="regbtn done" data-reg="${esc(it.fecha)}|${esc(it.titulo)}">Ya estás registrado ✓</button>`:`<button type="button" class="regbtn" data-reg="${esc(it.fecha)}|${esc(it.titulo)}">Regístrate</button>`):""}</div></div>`;
+    <div class="txt"><span class="tag ${it.fixed?"fixed":""}">${esc(it.tag)}</span><b>${esc(it.titulo)}</b><small>${esc(it.hora)} · ${esc(it.detalle)}</small>${(!it.fixed&&it.tag!=="Aviso"&&it.registro!==false)?(yaReg(it)?`<button type="button" class="regbtn done" data-reg="${esc(it.fecha)}|${esc(it.titulo)}">Ya estás registrado ✓</button>`:`<button type="button" class="regbtn" data-reg="${esc(it.fecha)}|${esc(it.titulo)}">Regístrate</button>`):""}</div></div>`;
 }
 
 // Inicio: próximos 7 días

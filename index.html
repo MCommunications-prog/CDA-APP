@@ -477,8 +477,8 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
         <span class="eyebrow">Liderazgo</span>
         <h2>Nuestros pastores</h2>
         <div class="pcards">
-          <figure class="pcard"><img src="fotos/perfil-octavio-guillen.jpg?v=2" alt="Obispo Octavio Guillén" loading="lazy" width="480" height="600"><figcaption><b>Obispo Octavio Guillén</b><small>Pastor principal</small></figcaption></figure>
-          <figure class="pcard"><img src="fotos/perfil-andrea-orellana.jpg?v=2" alt="Pastora Andrea Orellana" loading="lazy" width="480" height="600"><figcaption><b>Pastora Andrea Orellana</b><small>Pastora ejecutiva · Directora del Instituto Bíblico</small></figcaption></figure>
+          <figure class="pcard"><img src="fotos/perfil-octavio-guillen.jpg?v=3" alt="Obispo Octavio Guillén" loading="lazy" width="480" height="600"><figcaption><b>Obispo Octavio Guillén</b><small>Pastor principal</small></figcaption></figure>
+          <figure class="pcard"><img src="fotos/perfil-andrea-orellana.jpg?v=3" alt="Pastora Andrea Orellana" loading="lazy" width="480" height="600"><figcaption><b>Pastora Andrea Orellana</b><small>Pastora ejecutiva · Directora del Instituto Bíblico</small></figcaption></figure>
         </div>
         <h2 id="lideresTitle" hidden>Líderes de ministerios</h2>
         <div class="card people" id="lideres" hidden></div>
@@ -756,12 +756,13 @@ const PASTORES=[{nombre:"Obispo Octavio Guillén",cargo:"Pastor",foto:""},{nombr
 const LIDERES=[ // Según el Manual Operativo CDA (cap. 2.3). Foto: "fotos/nombre.jpg"
   {nombre:"Ángel Gómez",cargo:"Adoración (New Season Worship)",foto:""},
   {nombre:"Ruth Ayala",cargo:"Jóvenes",foto:""},
-  {nombre:"Pastora Andrea Orellana",cargo:"Mujeres",foto:"fotos/avatar-andrea-orellana.jpg?v=2"},
-  {nombre:"Obispo Octavio Guillén",cargo:"Hombres y CDA Groups",foto:""},
+  {nombre:"Pastora Andrea Orellana",cargo:"Mujeres",foto:"fotos/avatar-andrea-orellana.jpg?v=3"},
+  {nombre:"Obispo Octavio Guillén",cargo:"Hombres y CDA Groups",foto:"fotos/avatar-octavio-guillen.jpg?v=3"},
   {nombre:"Rosalie Tirado",cargo:"Niños y Teens",foto:""},
   {nombre:"Rebeca Ayala",cargo:"Oración e Intercesión",foto:""},
   {nombre:"Alexander y Rebeca Ayala",cargo:"Ujieres",foto:""},
-  {nombre:"Marilyn Cardona",cargo:"Comunicación",foto:""}
+  {nombre:"Marilyn Cardona",cargo:"Comunicación",foto:""},
+  {nombre:"Ivelisse Negrón",cargo:"Administración · Líder administrativa",foto:""}
 ];
 function renderPeople(el,list){el.innerHTML="";list.forEach(p=>{const d=document.createElement("div");d.className="person";const ph=document.createElement("div");ph.className="ph";if(p.foto){ph.style.backgroundImage="url('"+p.foto+"')";ph.setAttribute("role","img");ph.setAttribute("aria-label",p.nombre)}else{ph.textContent=p.nombre.replace(/^(Obispo|Pastora?|Hno\.|Hna\.)\s+/,"").split(/\s+/).filter(w=>w!=="y").map(w=>w[0]).slice(0,2).join("")}const t=document.createElement("div");const b=document.createElement("b");b.textContent=p.nombre;const s=document.createElement("small");s.textContent=p.cargo;t.append(b,s);d.append(ph,t);el.append(d)})}
 if(LIDERES.length){renderPeople(document.getElementById("lideres"),LIDERES);document.getElementById("lideres").hidden=false;document.getElementById("lideresTitle").hidden=false}

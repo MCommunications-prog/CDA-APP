@@ -61,6 +61,8 @@
 .regev{background:var(--bg);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
 .regev small{color:var(--muted)}
 .sheet p.ok{color:var(--ok)}
+.ticket{display:block;width:100%;max-width:300px;margin:0 auto;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.14)}
+.btn.ghost2{background:var(--bg);color:var(--ink)}
 #regErr{color:#c0392b}
 .sheet .panel{max-height:92vh;overflow:auto}
 .sheet .close{all:unset;cursor:pointer;text-align:center;padding:14px;font-weight:600;color:var(--muted)}
@@ -595,7 +597,9 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
     </form>
     <div id="regDone" class="stack" hidden style="gap:10px">
       <p class="ok" id="regOkTxt">¡Listo! Quedaste registrado. Te esperamos.</p>
-      <a class="btn" id="regCal" target="_blank" rel="noopener">Agregar a mi calendario</a>
+      <canvas id="regTicket" class="ticket" aria-label="Tu boleto con código QR"></canvas>
+      <button class="btn" type="button" id="regSave">Guardar boleto en mis fotos</button>
+      <a class="btn ghost2" id="regCal" target="_blank" rel="noopener">Agregar a mi calendario</a>
     </div>
     <button class="close" type="button" id="regClose">Cerrar</button>
   </div>
@@ -638,7 +642,7 @@ function itemsFor(date){
 }
 function itemRow(date,it){
   return `<div class="row"><div class="date"><b>${date.getDate()}</b><span>${MES[date.getMonth()]}</span></div>
-    <div class="txt"><span class="tag ${it.fixed?"fixed":""}">${esc(it.tag)}</span><b>${esc(it.titulo)}</b><small>${esc(it.hora)} · ${esc(it.detalle)}</small>${(!it.fixed&&it.tag!=="Aviso"&&it.registro!==false)?(yaReg(it)?`<button type="button" class="regbtn done" data-reg="${esc(it.fecha)}|${esc(it.titulo)}">Ya estás registrado ✓</button>`:`<button type="button" class="regbtn" data-reg="${esc(it.fecha)}|${esc(it.titulo)}">Regístrate</button>`):""}</div></div>`;
+    <div class="txt"><span class="tag ${it.fixed?"fixed":""}">${esc(it.tag)}</span><b>${esc(it.titulo)}</b><small>${esc(it.hora)} · ${esc(it.detalle)}</small>${(!it.fixed&&it.tag!=="Aviso"&&it.registro!==false)?(yaReg(it)?`<button type="button" class="regbtn done" data-reg="${esc(it.fecha)}|${esc(it.titulo)}">${boletosGuardados()[regKey(it)]?"Ver mi boleto 🎟️":"Ya estás registrado ✓"}</button>`:`<button type="button" class="regbtn" data-reg="${esc(it.fecha)}|${esc(it.titulo)}">Regístrate</button>`):""}</div></div>`;
 }
 
 // Inicio: próximos 7 días
@@ -730,6 +734,42 @@ $("prevM").onclick=()=>{view.setMonth(view.getMonth()-1);renderCal()};
 $("nextM").onclick=()=>{view.setMonth(view.getMonth()+1);renderCal()};
 renderCal();
 
+
+// Boleto con código QR: se dibuja en el mismo teléfono. El QR solo lleva el número de boleto (sin datos personales).
+var QR_LIB="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";
+function nuevoBoleto(){var A="ABCDEFGHJKMNPQRSTUVWXYZ23456789",r=new Uint8Array(6),s="";crypto.getRandomValues(r);for(var i=0;i<6;i++)s+=A[r[i]%A.length];return "CDA-"+s}
+function cargarQR(){return window.qrcode?Promise.resolve():new Promise(function(ok,no){var s=document.createElement("script");s.src=QR_LIB;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function dibujarBoleto(c,b){
+  return cargarQR().then(function(){
+    var W=600,x=c.getContext("2d");c.width=W;
+    function rr(X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()}
+    function lineas(t,max,font){x.font=font;var p=String(t).split(" "),o=[],l="";p.forEach(function(w){var n=l?l+" "+w:w;if(x.measureText(n).width>max&&l){o.push(l);l=w}else l=n});if(l)o.push(l);return o.slice(0,2)}
+    var tit=lineas(b.evento,W-80,"800 34px Montserrat, Arial, sans-serif"),q=qrcode(0,"M");q.addData(b.code);q.make();
+    var n=q.getModuleCount(),cel=Math.floor(380/n),T=cel*n,H=175+42*tit.length+34+40+T+120;c.height=H;
+    x.clearRect(0,0,W,H);rr(0,0,W,H,36);x.fillStyle="#fff";x.fill();
+    x.save();rr(0,0,W,H,36);x.clip();var g=x.createLinearGradient(0,0,W,0);g.addColorStop(0,"#ffe066");g.addColorStop(.5,"#f5c518");g.addColorStop(1,"#ffb81c");x.fillStyle=g;x.fillRect(0,0,W,120);x.restore();
+    x.fillStyle="#171a21";x.textBaseline="alphabetic";x.font="800 30px Montserrat, Arial, sans-serif";x.fillText("CDA Casa del Alfarero",40,62);
+    x.font="600 20px Inter, Arial, sans-serif";x.fillText("BOLETO DE ENTRADA",40,95);
+    var y=175;x.font="800 34px Montserrat, Arial, sans-serif";tit.forEach(function(l){x.fillText(l,40,y);y+=42});
+    x.fillStyle="#5a6072";x.font="500 22px Inter, Arial, sans-serif";x.fillText(b.cuando,40,y);y+=34;
+    x.fillText(b.name+" · "+b.cuantos+(b.cuantos==1?" persona":" personas"),40,y);
+    var ox=(W-T)/2,oy=y+40;
+    x.fillStyle="#171a21";for(var r=0;r<n;r++)for(var k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(ox+k*cel,oy+r*cel,cel,cel);
+    x.textAlign="center";x.font="800 34px Montserrat, Arial, sans-serif";x.fillText(b.code,W/2,oy+T+52);
+    x.fillStyle="#5a6072";x.font="500 20px Inter, Arial, sans-serif";x.fillText("Muestra este código al llegar",W/2,oy+T+86);x.textAlign="left";
+    x.setLineDash([10,10]);x.strokeStyle="#e3e5ec";x.lineWidth=3;x.beginPath();x.moveTo(30,135);x.lineTo(W-30,135);x.stroke();x.setLineDash([]);
+  });
+}
+function guardarBoleto(c,b){
+  c.toBlob(function(bl){
+    var f=new File([bl],"boleto-"+b.code+".png",{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:"Boleto "+b.evento}).catch(function(){});return}
+    var a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download=f.name;document.body.appendChild(a);a.click();a.remove();
+  },"image/png");
+}
+function boletosGuardados(){try{return JSON.parse(localStorage.getItem("cda-boletos"))||{}}catch(e){return {}}}
+function guardarLocal(k,b){var t=boletosGuardados();t[k]=b;try{localStorage.setItem("cda-boletos",JSON.stringify(t))}catch(e){}}
+
 // Registro a eventos (llega a la hoja CDA APP INFO, pestaña Inscripciones, y al correo cdaorlandoministry@gmail.com)
 function regKey(it){return it.fecha+"|"+it.titulo}
 function yaReg(it){return (store.get("cda-registros")||[]).includes(regKey(it))}
@@ -745,8 +785,17 @@ function abrirReg(key){
   const p=profile.example?{}:profile;
   $("regName").value=p.fullName||""; $("regPhone").value=p.phone||""; $("regEmail").value=p.email||"";
   $("regForm").hidden=false; $("regDone").hidden=true; $("regErr").hidden=true; $("regCal").href=calLink(regEv);
-  $("regSheet").hidden=false; $("regName").focus();
+  $("regSheet").hidden=false;
+  const tb=boletosGuardados()[key]; if(tb){mostrarBoleto(tb,false);return}
+  $("regName").focus();
 }
+let boletoActual=null;
+function mostrarBoleto(b,nuevo){
+  boletoActual=b; $("regForm").hidden=true; $("regDone").hidden=false;
+  $("regOkTxt").textContent=nuevo?"¡Listo! Quedaste registrado. "+(b.email?"También te enviamos el boleto por correo. ":"")+"Guárdalo y muéstralo al llegar.":"Este es tu boleto. Muéstralo al llegar.";
+  dibujarBoleto($("regTicket"),b).catch(()=>{$("regTicket").hidden=true});
+}
+$("regSave").addEventListener("click",()=>{if(boletoActual)guardarBoleto($("regTicket"),boletoActual)});
 document.addEventListener("click",e=>{const b=e.target.closest("[data-reg]");if(b)abrirReg(b.dataset.reg)});
 $("regClose").addEventListener("click",()=>{$("regSheet").hidden=true});
 $("regSheet").addEventListener("click",e=>{if(e.target===$("regSheet"))$("regSheet").hidden=true});
@@ -756,11 +805,12 @@ $("regForm").addEventListener("submit",e=>{
   const name=$("regName").value.trim(), phone=$("regPhone").value.trim(), email=$("regEmail").value.trim();
   if(!name||(!phone&&!email)){$("regErr").textContent="Escribe tu nombre y un teléfono o correo, por favor.";$("regErr").hidden=false;return}
   $("regSend").disabled=true; $("regSend").textContent="Enviando…";
-  enviarHoja({tipo:"registro",evento:regEv.titulo,fecha:$("regEvWhen").textContent,name,phone,email,cuantos:$("regCount").value,nota:$("regNote").value.trim(),origen:"app"}).then(ok=>{
+  const bol={code:nuevoBoleto(),evento:regEv.titulo,cuando:$("regEvWhen").textContent,name,cuantos:+$("regCount").value,email};
+  enviarHoja({tipo:"registro",evento:regEv.titulo,fecha:$("regEvWhen").textContent,name,phone,email,cuantos:$("regCount").value,nota:$("regNote").value.trim(),origen:"app",boleto:bol.code}).then(ok=>{
     $("regSend").disabled=false; $("regSend").textContent="Confirmar registro";
     if(!ok){$("regErr").textContent="No se pudo enviar. Revisa tu conexión o llámanos al (321) 315-1506.";$("regErr").hidden=false;return}
     const l=store.get("cda-registros")||[]; if(!l.includes(regKey(regEv)))l.push(regKey(regEv)); store.set("cda-registros",l);
-    $("regOkTxt").textContent="¡Listo! Quedaste registrado. "+(email?"Te enviamos la confirmación por correo. ":"")+"Te esperamos."; $("regForm").reset(); $("regForm").hidden=true; $("regDone").hidden=false; renderHome(); renderCal();
+    guardarLocal(regKey(regEv),bol); $("regForm").reset(); mostrarBoleto(bol,true); renderHome(); renderCal();
   });
 });
 

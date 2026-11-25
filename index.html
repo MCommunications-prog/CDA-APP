@@ -56,6 +56,13 @@
 .opt{all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:16px;font-size:1.05rem;font-weight:600;color:var(--ink);text-decoration:none}
 .opt small{display:block;font-weight:400;font-size:.85rem;color:var(--muted)}
 .opt .oi{width:44px;height:44px;border-radius:50%;background:var(--brand);color:var(--accent);display:grid;place-items:center;flex:none;font-size:1.3rem}
+.regbtn{all:unset;cursor:pointer;align-self:flex-start;margin-top:6px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:.85rem;padding:7px 14px;border-radius:999px}
+.regbtn.done{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.regev{background:var(--bg);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.regev small{color:var(--muted)}
+.sheet p.ok{color:var(--ok)}
+#regErr{color:#c0392b}
+.sheet .panel{max-height:92vh;overflow:auto}
 .sheet .close{all:unset;cursor:pointer;text-align:center;padding:14px;font-weight:600;color:var(--muted)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -573,6 +580,26 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
     <button class="close" type="button" id="sheetClose">Cerrar</button>
   </div>
 </div>
+<div class="sheet" id="regSheet" hidden role="dialog" aria-modal="true" aria-labelledby="regT">
+  <div class="panel">
+    <h2 id="regT">Regístrate</h2>
+    <div class="regev"><b id="regEvName"></b><small id="regEvWhen"></small></div>
+    <form id="regForm" class="stack" style="gap:10px">
+      <div class="field"><label for="regName">Nombre y apellido</label><input id="regName" autocomplete="name" required></div>
+      <div class="field"><label for="regPhone">Teléfono</label><input id="regPhone" type="tel" autocomplete="tel"></div>
+      <div class="field"><label for="regEmail">Correo (te enviamos la confirmación)</label><input id="regEmail" type="email" autocomplete="email"></div>
+      <div class="field"><label for="regCount">¿Cuántas personas vienen contigo incluyéndote?</label><select id="regCount"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
+      <div class="field"><label for="regNote">Comentario (opcional)</label><textarea id="regNote" rows="2" placeholder="Ej.: alergias, necesito transporte, vengo con niños"></textarea></div>
+      <p class="note" id="regErr" hidden></p>
+      <button class="btn" type="submit" id="regSend">Confirmar registro</button>
+    </form>
+    <div id="regDone" class="stack" hidden style="gap:10px">
+      <p class="ok" id="regOkTxt">¡Listo! Quedaste registrado. Te esperamos.</p>
+      <a class="btn" id="regCal" target="_blank" rel="noopener">Agregar a mi calendario</a>
+    </div>
+    <button class="close" type="button" id="regClose">Cerrar</button>
+  </div>
+</div>
 
 </div>
 
@@ -585,7 +612,7 @@ let EVENTOS = [
   {fecha:"2026-11-26", hora:"5:00 am", titulo:"Esta semana no hay oración de madrugada", detalle:"Volvemos la próxima semana.", tag:"Aviso"}
 ];
 // Días en que NO hay reunión fija (se reemplaza o se suspende). Formato AAAA-MM-DD.
-const SIN_FIJO = ["2026-11-24","2026-11-25","2026-11-26"]; // Agregar aquí eventos confirmados: {fecha:"2026-12-13", hora:"5:00 pm", titulo:"...", detalle:"...", tag:"Especial"}
+const SIN_FIJO = ["2026-11-24","2026-11-25","2026-11-26"]; // Agregar aquí eventos confirmados: {fecha:"2026-12-13", hora:"5:00 pm", titulo:"...", detalle:"...", tag:"Especial"}  (todos los eventos llevan botón Regístrate, menos los "Aviso"; para quitarlo: registro:false)
 const MENSAJES = [];
 // d: día (0=domingo); dur en minutos; vivo: se transmite
 const REUNIONES = [
@@ -611,7 +638,7 @@ function itemsFor(date){
 }
 function itemRow(date,it){
   return `<div class="row"><div class="date"><b>${date.getDate()}</b><span>${MES[date.getMonth()]}</span></div>
-    <div class="txt"><span class="tag ${it.fixed?"fixed":""}">${esc(it.tag)}</span><b>${esc(it.titulo)}</b><small>${esc(it.hora)} · ${esc(it.detalle)}</small></div></div>`;
+    <div class="txt"><span class="tag ${it.fixed?"fixed":""}">${esc(it.tag)}</span><b>${esc(it.titulo)}</b><small>${esc(it.hora)} · ${esc(it.detalle)}</small>${(!it.fixed&&it.tag!=="Aviso"&&it.registro!==false)?(yaReg(it)?`<button type="button" class="regbtn done" data-reg="${esc(it.fecha)}|${esc(it.titulo)}">Ya estás registrado ✓</button>`:`<button type="button" class="regbtn" data-reg="${esc(it.fecha)}|${esc(it.titulo)}">Regístrate</button>`):""}</div></div>`;
 }
 
 // Inicio: próximos 7 días
@@ -702,6 +729,40 @@ $("grid").addEventListener("click",e=>{const b=e.target.closest("[data-day]");if
 $("prevM").onclick=()=>{view.setMonth(view.getMonth()-1);renderCal()};
 $("nextM").onclick=()=>{view.setMonth(view.getMonth()+1);renderCal()};
 renderCal();
+
+// Registro a eventos (llega a la hoja CDA APP INFO, pestaña Inscripciones, y al correo cdaorlandoministry@gmail.com)
+function regKey(it){return it.fecha+"|"+it.titulo}
+function yaReg(it){return (store.get("cda-registros")||[]).includes(regKey(it))}
+let regEv=null;
+function horaEv(e){const m=String(e.hora).match(/(\d+):(\d+)\s*(am|pm)/i);if(!m)return null;let h=+m[1]%12;if(/pm/i.test(m[3]))h+=12;return [h,+m[2]]}
+function calLink(e){const hm=horaEv(e)||[19,0];const [y,mo,d]=e.fecha.split("-").map(Number);const p=n=>String(n).padStart(2,"0");const a=new Date(y,mo-1,d,hm[0],hm[1]),b=new Date(a.getTime()+(e.dur||120)*6e4);const f=x=>`${x.getFullYear()}${p(x.getMonth()+1)}${p(x.getDate())}T${p(x.getHours())}${p(x.getMinutes())}00`;
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(e.titulo+" · CDA")+"&dates="+f(a)+"/"+f(b)+"&ctz=America/New_York&details="+encodeURIComponent(e.detalle||"")+"&location="+encodeURIComponent(e.lugar||"CDA Casa del Alfarero, 9227 2nd Ave, Orlando, FL 32824")}
+function abrirReg(key){
+  regEv=EVENTOS.find(e=>regKey(e)===key); if(!regEv)return;
+  const [y,mo,d]=regEv.fecha.split("-").map(Number), dt=new Date(y,mo-1,d);
+  $("regEvName").textContent=regEv.titulo;
+  $("regEvWhen").textContent=`${DIA[dt.getDay()]} ${d} de ${MESL[mo-1]} · ${regEv.hora}`;
+  const p=profile.example?{}:profile;
+  $("regName").value=p.fullName||""; $("regPhone").value=p.phone||""; $("regEmail").value=p.email||"";
+  $("regForm").hidden=false; $("regDone").hidden=true; $("regErr").hidden=true; $("regCal").href=calLink(regEv);
+  $("regSheet").hidden=false; $("regName").focus();
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-reg]");if(b)abrirReg(b.dataset.reg)});
+$("regClose").addEventListener("click",()=>{$("regSheet").hidden=true});
+$("regSheet").addEventListener("click",e=>{if(e.target===$("regSheet"))$("regSheet").hidden=true});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("regSheet").hidden=true});
+$("regForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const name=$("regName").value.trim(), phone=$("regPhone").value.trim(), email=$("regEmail").value.trim();
+  if(!name||(!phone&&!email)){$("regErr").textContent="Escribe tu nombre y un teléfono o correo, por favor.";$("regErr").hidden=false;return}
+  $("regSend").disabled=true; $("regSend").textContent="Enviando…";
+  enviarHoja({tipo:"registro",evento:regEv.titulo,fecha:$("regEvWhen").textContent,name,phone,email,cuantos:$("regCount").value,nota:$("regNote").value.trim(),origen:"app"}).then(ok=>{
+    $("regSend").disabled=false; $("regSend").textContent="Confirmar registro";
+    if(!ok){$("regErr").textContent="No se pudo enviar. Revisa tu conexión o llámanos al (321) 315-1506.";$("regErr").hidden=false;return}
+    const l=store.get("cda-registros")||[]; if(!l.includes(regKey(regEv)))l.push(regKey(regEv)); store.set("cda-registros",l);
+    $("regOkTxt").textContent="¡Listo! Quedaste registrado. "+(email?"Te enviamos la confirmación por correo. ":"")+"Te esperamos."; $("regForm").reset(); $("regForm").hidden=true; $("regDone").hidden=false; renderHome(); renderCal();
+  });
+});
 
 // Perfil
 const EJEMPLO={fullName:"Hna. María López",phone:"(407) 555-0123",email:"maria@ejemplo.com",birthday:"1985-03-14",since:"2019",baptized:"Sí",group:"Grupo A (ejemplo)",ministries:["Adoración (New Season Worship)","Oración e Intercesión"],institute:true,photo:"",example:true};

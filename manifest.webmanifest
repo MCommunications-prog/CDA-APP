@@ -10,10 +10,74 @@
   "orientation": "portrait",
   "background_color": "#f5c518",
   "theme_color": "#ffffff",
-  "categories": ["lifestyle", "education"],
+  "categories": [
+    "lifestyle",
+    "education"
+  ],
   "icons": [
-    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
-    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "capturas/1-inicio.jpg",
+      "sizes": "540x960",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Inicio"
+    },
+    {
+      "src": "capturas/2-vivo.jpg",
+      "sizes": "540x960",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Cultos en vivo"
+    },
+    {
+      "src": "capturas/3-calendario.jpg",
+      "sizes": "540x960",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Horarios y calendario"
+    },
+    {
+      "src": "capturas/4-ofrendar.jpg",
+      "sizes": "540x960",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Formas de ofrendar"
+    }
+  ],
+  "prefer_related_applications": false,
+  "dir": "ltr",
+  "shortcuts": [
+    {
+      "name": "En vivo",
+      "url": "./#vivo"
+    },
+    {
+      "name": "Calendario",
+      "url": "./#calendario"
+    },
+    {
+      "name": "Ofrendar",
+      "url": "./#ofrendar"
+    }
   ]
 }
